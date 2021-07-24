@@ -18,6 +18,7 @@
  */
 #[macro_use]
 extern crate clap;
+extern crate rayon;
 
 mod lib;
 
@@ -25,6 +26,7 @@ use std::io;
 use std::io::BufRead;
 use clap::App;
 use std::path::Path;
+use rayon::prelude::*;
 
 fn main() {
     let yaml = load_yaml!("cli.yaml");
@@ -43,14 +45,13 @@ fn main() {
         Some(word_delim) => word_delim,
         None => "|"
     };
-    let dict = lib::load_dict(dict_path).unwrap();
-    let wordcut = lib::Wordcut::new(dict);
+    let dict = lib::load_dict(dict_path).unwrap();  // unwrap() returns the value in Ok(value)
+    let wordcut = lib::Wordcut::new(dict); // this dict contains all separated single words, right?
         
-    for line_opt in io::BufReader::new(io::stdin()).lines() {
-
+    for line_opt in io::BufReader::new(io::stdin()).lines() { //???
         let cleaned_line = match line_opt {
-            Ok(line) => if line.len() > 0 {
-                line.trim_end_matches('\n').to_string()
+            Ok(line) => if line.len() > 0 {  // for a fancy character, len() may return more than 1
+                line.trim_end_matches('\n').to_string() //return the line with the new line character removed
             } else {
                 line
             },
@@ -60,4 +61,37 @@ fn main() {
         let segmented_string = wordcut.put_delimiters(&cleaned_line, word_delim);
         println!("{}", segmented_string);
     }
+// -------------- Parallel using rayon -------------
+    let line_p:Vec<String> = io::BufReader::new(io::stdin()).lines()
+        .par_iter()
+        .map(|line_opt_p|
+            if line_opt_p.matches(line_p) {
+                let
+            }
+                 cleaned_line_p
+
+            let cleaned_line_p = match line_opt_p
+        //     if line_opt_p.len() > 0 {
+        //         line_opt_p = line_opt_p.trim_end_matches('\n').to_string()
+        // .map(|line_p| line_p.delimeter())
+
+
+        //     if cleaned_line_p.len() > 0 {
+        //         Ok(cleaned_line_p.trim_end_matches('\n').to_string())
+        //     } else {
+        //         Ok(cleaned_line_p)
+        //     });
+
+
+    let line_opt_p:Vec<String> = io::BufReader::new(io::stdin()).lines().par_iter();
+    let clean_line_p = line_opt_p
+        .map(|x|
+            if x.matches(line_opt_p)) {
+        Ok(cleaned_line_p) => if cleaned_line_p.len() > 0 {
+            cleaned_line_p.trim_end_matches('\n').to_string()
+        } else {
+                    cleaned_line_p
+        }
+    };
+
 }

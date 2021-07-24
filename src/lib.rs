@@ -173,7 +173,7 @@ mod tests {
         let expected = vec![TextRange{s:0,e:1},TextRange{s:1,e:2},TextRange{s:2,e:5}];
         assert_eq!(words, expected)
     }
-
+//Lao
     #[test]
     fn test_lao() {
         let dict = super::load_dict(super::lao_path());
