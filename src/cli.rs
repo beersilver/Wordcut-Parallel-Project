@@ -19,6 +19,7 @@
 #[macro_use]
 extern crate clap;
 extern crate rayon;
+extern crate core;
 
 mod lib;
 
@@ -26,7 +27,9 @@ use std::io;
 use std::io::BufRead;
 use clap::App;
 use std::path::Path;
-use rayon::prelude::*;
+use rayon::prelude::IntoParallelRefIterator;
+// use rayon::prelude::*;
+// use core::panicking::panic;
 
 fn main() {
     let yaml = load_yaml!("cli.yaml");
@@ -47,51 +50,65 @@ fn main() {
     };
     let dict = lib::load_dict(dict_path).unwrap();  // unwrap() returns the value in Ok(value)
     let wordcut = lib::Wordcut::new(dict); // this dict contains all separated single words, right?
-        
-    for line_opt in io::BufReader::new(io::stdin()).lines() { //???
-        let cleaned_line = match line_opt {
-            Ok(line) => if line.len() > 0 {  // for a fancy character, len() may return more than 1
-                line.trim_end_matches('\n').to_string() //return the line with the new line character removed
-            } else {
-                line
-            },
-            Err(e) => panic!("Cannot read line {}", e)
-        };
 
-        let segmented_string = wordcut.put_delimiters(&cleaned_line, word_delim);
-        println!("{}", segmented_string);
-    }
+// -------------- Original version -------------
+
+    // for line_opt in io::BufReader::new(io::stdin()).lines() { //???
+    //     let cleaned_line = match line_opt {
+    //         Ok(line) => if line.len() > 0 {  // for a fancy character, len() may return more than 1
+    //             line.trim_end_matches('\n').to_string() //return the line with the new line character removed
+    //         } else {
+    //             line
+    //         },
+    //         Err(e) => panic!("Cannot read line {}", e)
+    //     };
+    //
+    //     let segmented_string = wordcut.put_delimiters(&cleaned_line, word_delim);
+    //     println!("{}", segmented_string);
+    // }
+
 // -------------- Parallel using rayon -------------
+
     let line_p:Vec<String> = io::BufReader::new(io::stdin()).lines()
         .par_iter()
-        .map(|line_opt_p|
-            if line_opt_p.matches(line_p) {
-                let
-            }
-                 cleaned_line_p
+        .map(|line|
+             if line.len() > 0 {
+                 Ok(line.trim_end_matches('\n').to_string());
+             })
+             .map(|line| wordcut.put_delimiters(line,word_delim))
+             .for_each(|segmented_string_l| println!("{}", segmented_string_l));
 
-            let cleaned_line_p = match line_opt_p
-        //     if line_opt_p.len() > 0 {
-        //         line_opt_p = line_opt_p.trim_end_matches('\n').to_string()
-        // .map(|line_p| line_p.delimeter())
+    line_p.iter();
 
 
-        //     if cleaned_line_p.len() > 0 {
-        //         Ok(cleaned_line_p.trim_end_matches('\n').to_string())
-        //     } else {
-        //         Ok(cleaned_line_p)
-        //     });
 
 
-    let line_opt_p:Vec<String> = io::BufReader::new(io::stdin()).lines().par_iter();
-    let clean_line_p = line_opt_p
-        .map(|x|
-            if x.matches(line_opt_p)) {
-        Ok(cleaned_line_p) => if cleaned_line_p.len() > 0 {
-            cleaned_line_p.trim_end_matches('\n').to_string()
-        } else {
-                    cleaned_line_p
-        }
-    };
+    // My garbage below
+    //         return panic!("Can't read line!");
+    //     })
+    // .map(|line_opt_p| )
+
+        // let cleaned_line_p = match line_opt_p
+    //     if line_opt_p.len() > 0 {
+    //         line_opt_p = line_opt_p.trim_end_matches('\n').to_string()
+    // .map(|line_p| line_p.delimeter())
+
+
+    //     if cleaned_line_p.len() > 0 {
+    //         Ok(cleaned_line_p.trim_end_matches('\n').to_string())
+    //     } else {
+    //         Ok(cleaned_line_p)
+    //     });
+
+    // let line_opt_p:Vec<String> = io::BufReader::new(io::stdin()).lines().par_iter();
+    // let clean_line_p = line_opt_p
+    //     .map(|x|
+    //         if x.matches(line_opt_p)) {
+    //     Ok(cleaned_line_p) => if cleaned_line_p.len() > 0 {
+    //         cleaned_line_p.trim_end_matches('\n').to_string()
+    //     } else {
+    //                 cleaned_line_p
+    //     }
+    // };
 
 }
