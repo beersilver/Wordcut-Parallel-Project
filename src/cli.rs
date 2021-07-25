@@ -28,7 +28,7 @@ use std::io::BufRead;
 use clap::App;
 use std::path::Path;
 use rayon::prelude::IntoParallelRefIterator;
-// use rayon::prelude::*;
+use rayon::prelude::*;
 // use core::panicking::panic;
 
 fn main() {
@@ -46,39 +46,42 @@ fn main() {
     };
     let word_delim = match matches.value_of("word_delimiter") {
         Some(word_delim) => word_delim,
-        None => "|"
+        None => " "
     };
     let dict = lib::load_dict(dict_path).unwrap();  // unwrap() returns the value in Ok(value)
     let wordcut = lib::Wordcut::new(dict); // this dict contains all separated single words, right?
 
 // -------------- Original version -------------
 
-    // for line_opt in io::BufReader::new(io::stdin()).lines() { //???
-    //     let cleaned_line = match line_opt {
-    //         Ok(line) => if line.len() > 0 {  // for a fancy character, len() may return more than 1
-    //             line.trim_end_matches('\n').to_string() //return the line with the new line character removed
-    //         } else {
-    //             line
-    //         },
-    //         Err(e) => panic!("Cannot read line {}", e)
-    //     };
-    //
-    //     let segmented_string = wordcut.put_delimiters(&cleaned_line, word_delim);
-    //     println!("{}", segmented_string);
-    // }
+    for line_opt in io::BufReader::new(io::stdin()).lines() {   //???
+        let cleaned_line = match line_opt {
+            Ok(line) => if line.len() > 0 {                                // for a fancy character, len() may return more than 1
+                line.trim_end_matches('\n').to_string()                     //return the line with the new line character removed
+            } else {
+                line
+            },
+            Err(e) => panic!("Cannot read line {}", e)
+        };
+
+        let segmented_string = wordcut.put_delimiters(&cleaned_line, word_delim);
+        println!("{}", segmented_string);
+    }
 
 // -------------- Parallel using rayon -------------
-
-    let line_p:Vec<String> = io::BufReader::new(io::stdin()).lines()
-        .par_iter()
+    let mut lines: Vec<String> = vec![];
+    io::BufReader::new(io::stdin()).lines()
         .map(|line|
+            lines.push(line.unwrap()));
+
+    let cleaned_line_p:String = lines.par_iter()
+            .map(|line|
              if line.len() > 0 {
                  Ok(line.trim_end_matches('\n').to_string());
              })
-             .map(|line| wordcut.put_delimiters(line,word_delim))
-             .for_each(|segmented_string_l| println!("{}", segmented_string_l));
+            .map(|line| wordcut.put_delimiters(&cleaned_line_p,word_delim))
+            .for_each(|segmented_string| println!("{}", segmented_string));
 
-    line_p.iter();
+    cleaned_line_p.iter();
 
 
 
