@@ -29,6 +29,8 @@ use clap::App;
 use std::path::Path;
 use rayon::prelude::IntoParallelRefIterator;
 use rayon::prelude::*;
+use std::time::Instant;
+
 // use core::panicking::panic;
 
 fn main() {
@@ -46,14 +48,16 @@ fn main() {
     };
     let word_delim = match matches.value_of("word_delimiter") {
         Some(word_delim) => word_delim,
-        None => " "
+        None => " | "
     };
     let dict = lib::load_dict(dict_path).unwrap();  // unwrap() returns the value in Ok(value)
     let wordcut = lib::Wordcut::new(dict); // this dict contains all separated single words, right?
 
+    let start = Instant::now();
+
 // -------------- Original version -------------
 
-    for line_opt in io::BufReader::new(io::stdin()).lines() {   //???
+    for line_opt in io::BufReader::new(io::stdin()).lines() {   //read the command
         let cleaned_line = match line_opt {
             Ok(line) => if line.len() > 0 {                                // for a fancy character, len() may return more than 1
                 line.trim_end_matches('\n').to_string()                     //return the line with the new line character removed
@@ -68,21 +72,25 @@ fn main() {
     }
 
 // -------------- Parallel using rayon -------------
-    let mut lines: Vec<String> = vec![];
-    io::BufReader::new(io::stdin()).lines()
+    let mut lines: Vec<String> = vec![];        // create vector
+    io::BufReader::new(io::stdin()).lines() // read command line
         .map(|line|
-            lines.push(line.unwrap()));
+            lines.push(line.unwrap())); // push to vector
 
-    let cleaned_line_p:String = lines.par_iter()
-            .map(|line|
-             if line.len() > 0 {
-                 Ok(line.trim_end_matches('\n').to_string());
-             })
-            .map(|line| wordcut.put_delimiters(&cleaned_line_p,word_delim))
-            .for_each(|segmented_string| println!("{}", segmented_string));
+    let cleaned_line_p = lines
+        .par_iter()
+        .map(|line| {
+            if line.len() > 0 {
+                line.trim_end_matches('\n').to_string();
+            };
+            line
+        });
+    //     .map(|line| wordcut.put_delimiters(&line, word_delim))  // I'm stuck here
+    //     .for_each(|segmented_string| println!("{}", segmented_string));
+    //
+    // cleaned_line_p.iter();
 
-    cleaned_line_p.iter();
-
+    println!("Time: {:.2?}", start.elapsed());
 
 
 
@@ -113,5 +121,4 @@ fn main() {
     //                 cleaned_line_p
     //     }
     // };
-
 }
