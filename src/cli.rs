@@ -79,13 +79,8 @@ fn main() {
 
     let cleaned_line_p = lines
         .par_iter()
-        .map(|line| {
-            if line.len() > 0 {
-                line.trim_end_matches('\n').to_string();
-            };
-            line
-        });
-    //     .map(|line| wordcut.put_delimiters(&line, word_delim))  // I'm stuck here
+        .map(|line| line.trim_end_matches('\n').to_string());
+    //     .map(|line| wordcut.put_delimiters(&line, word_delim))  // I'm stuck here, it's almost done :(
     //     .for_each(|segmented_string| println!("{}", segmented_string));
     //
     // cleaned_line_p.iter();
