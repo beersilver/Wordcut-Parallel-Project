@@ -5,11 +5,14 @@ I forked the repo from veer66/chamkho, and tried to implement the code to be in 
 This program can amazingly separate Thai single words from a long adjacent sentence!
 
 ## Example
-ผู้นำโง่เราจะตายกันหมด => ผู้|นำ|โง่|เรา|จะ|ตาย|กัน|หมด
+ผู้นำโง่เราจะตายกันหมด => ผู้ | นำ | โง่ | เรา | จะ | ตาย | กัน | หมด
 
-กล้ามาก เก่งมาก ขอบใจ => กล้า|มาก| |เก่ง|มาก| |ขอบ|ใจ
+กล้ามาก เก่งมาก ขอบใจ => กล้า | มาก |   | เก่ง | มาก |   | ขอบ | ใจ
 
-You can see the changed code in the file named 'cli.rs' from line 53.
+iheretoo ออกไป => iheretoo |   | ออก | ไป
+
+You can see my code in the file named 'cli.rs' from line 53. 
+It's not completely done yet.
 
 
 
